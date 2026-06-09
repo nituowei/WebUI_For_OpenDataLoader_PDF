@@ -1,6 +1,92 @@
 # WebUI For OpenDataLoader PDF
 
-A native WebUI for macOS to control the conversion process of OpenDataLoader PDF.
+A lightweight local WebUI for macOS that controls the OpenDataLoader PDF conversion workflow.
+
+[中文说明](#中文说明)
+
+## Features
+
+- Static H5 frontend with a small local Python API server.
+- Start or stop the optional OpenDataLoader hybrid daemon from the UI.
+- Open the native macOS file picker to select one or multiple PDF files.
+- Open the native macOS folder picker to choose the default output directory.
+- Export JSON, Markdown, HTML, Text, PDF, or Tagged PDF.
+- Image extraction is disabled by default, so Markdown/JSON/Text output will not create extra PNG files unless you enable it.
+- Dependency checks, conversion logs, job polling, and reverse-order logs with the newest entries first.
+- Shut down the WebUI server from the page, or manage the `8787` process with start/stop scripts.
+
+## Requirements
+
+- macOS
+- Python 3.10+
+- Java 11+
+
+OpenDataLoader PDF requires Java 11+ and Python 3.10+. If `java -version` is not available, you can install Temurin:
+
+```bash
+brew install --cask temurin
+```
+
+If you prefer a Homebrew formula that does not require the macOS installer flow:
+
+```bash
+brew install openjdk
+```
+
+This project automatically detects `/opt/homebrew/opt/openjdk` from `run.sh`.
+
+## Installation
+
+```bash
+git clone https://github.com/nituowei/WebUI_For_OpenDataLoader_PDF.git
+cd WebUI_For_OpenDataLoader_PDF
+./setup.sh
+```
+
+`setup.sh` installs `opendataloader-pdf[hybrid]`, which supports both basic conversion and the optional hybrid daemon.
+
+## Run
+
+For a foreground server:
+
+```bash
+./run.sh
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8787
+```
+
+For daily use, these scripts are recommended:
+
+```bash
+./start-webui.sh
+./stop-webui.sh
+```
+
+`start-webui.sh` starts the local `8787` server in the background and opens the WebUI in your default browser. `stop-webui.sh` shuts down the WebUI server. The page also includes a "Close WebUI" button, but a web page cannot start a local server that is not already running.
+
+## Moving The Project
+
+You can move the project folder anywhere as long as the internal file structure stays the same. After moving it, reinstall the virtual environment:
+
+```bash
+./setup.sh
+./start-webui.sh
+```
+
+Do not commit or reuse an old `.venv/` directory. Python virtual environments often contain machine-specific absolute paths.
+
+## Design Notes
+
+- For ordinary conversion, keeping a daemon running is usually unnecessary: the native Python/CLI conversion starts what it needs for each job and exits when done.
+- The hybrid daemon is useful for OCR-heavy or layout-heavy PDFs. Start it from the UI only when needed, then stop it to free resources.
+- Keeping one stable output directory, such as `~/Documents/ODL Output`, makes later RAG indexing, search, or archiving workflows easier.
+- Browser security prevents a static web page from directly reading arbitrary local absolute paths, so this project uses the local Python server to trigger native macOS file/folder pickers.
+
+## 中文说明
 
 一个面向 macOS 的本地 WebUI，用来控制 OpenDataLoader PDF 的转换流程。
 
@@ -12,7 +98,7 @@ A native WebUI for macOS to control the conversion process of OpenDataLoader PDF
 - 一键打开 macOS folder picker，设置默认输出目录。
 - 支持 JSON、Markdown、HTML、Text、PDF、Tagged PDF 输出格式。
 - 默认不导出图片，生成纯文本/Markdown/JSON 时不会额外产生 PNG；需要图片时可在界面切换。
-- 支持依赖检查、转换日志、任务状态轮询。
+- 支持依赖检查、转换日志、任务状态轮询，日志倒序显示，最新内容在最前面。
 - 页面可关闭 WebUI 主进程，也提供启动/关闭脚本管理 8787 端口。
 
 ## 系统要求
@@ -46,6 +132,8 @@ cd WebUI_For_OpenDataLoader_PDF
 `setup.sh` 会安装 `opendataloader-pdf[hybrid]`，用于支持基础转换和 hybrid daemon。
 
 ## 启动
+
+前台运行：
 
 ```bash
 ./run.sh
